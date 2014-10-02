@@ -5,10 +5,10 @@ load('data/f.RData')
 
 
 #usedCols <- c(myData$mNames)
-usedCols <- c(myData$otherVars,myData$mNames)
+usedCols <- c(myData$otherVars,myData$mNames,myData$dNames)
 
-#thold <- list(SOC=0,pH=0,Ca=0,P=0,Sand=0)
-thold <- list(SOC=0.05,pH=0.05,Ca=0.05,P=0.05,Sand=0.05)
+thold <- list(SOC=0,pH=0,Ca=0,P=0,Sand=0)
+#thold <- list(SOC=0.05,pH=0.05,Ca=0.05,P=0.05,Sand=0.05)
 
 result <- data.frame(PIDN = test$PIDN)
 
