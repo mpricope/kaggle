@@ -1,13 +1,13 @@
 # The following two commands remove any previously installed H2O packages for R.
-#if ("package:h2o" %in% search()) { detach("package:h2o", unload=TRUE) }
-#if ("h2o" %in% rownames(installed.packages())) { remove.packages("h2o") }
-
-# Next, we download, install and initialize the H2O package for R.
+# if ("package:h2o" %in% search()) { detach("package:h2o", unload=TRUE) }
+# if ("h2o" %in% rownames(installed.packages())) { remove.packages("h2o") }
+# 
+# # Next, we download, install and initialize the H2O package for R.
 # install.packages("h2o", repos=(c("http://h2o-release.s3.amazonaws.com/h2o/rel-lambert/5/R", getOption("repos"))))
 #install.packages("h2o", repos=(c("http://s3.amazonaws.com/h2o-release/h2o/master/1522/R", getOption("repos"))))
 library(h2o)
 #localH2O = h2o.init()
-localH2O <- h2o.init(ip = 'localhost', port =54321)
+localH2O <- h2o.init(ip = 'localhost', port =54321, startH2O = TRUE)
 
 # Finally, let's run a demo to see H2O at work.
 #demo(h2o.glm)
@@ -22,7 +22,7 @@ train_hex <- h2o.importFile(localH2O, path = tmf, key = "train.hex")
 write.csv(test,'data/tmp.csv')
 test_hex <- h2o.importFile(localH2O, path = tmf, key = "test.hex")
 
-train_hex_split <- h2o.splitFrame(train_hex, ratios = 0.8, shuffle = TRUE)
+#train_hex_split <- h2o.splitFrame(train_hex, ratios = 0.8, shuffle = TRUE)
 
 result <- data.frame(PIDN = test$PIDN)
 
@@ -40,12 +40,12 @@ for (i in myData$vars) {
   
   model <- h2o.deeplearning(x = tmf,
                             y = i,
-#                            data = train_hex,
-                             data = train_hex_split[[1]],
-                             validation = train_hex_split[[2]],
+                           data = train_hex,
+#                              data = train_hex_split[[1]],
+#                              validation = train_hex_split[[2]],
                             activation = "RectifierWithDropout",
                             hidden = c(75, 75,75,75),
-                            epochs = 100,
+                            epochs = 20,
                             seed=123456,
                             
                             classification = FALSE,
@@ -60,7 +60,9 @@ for (i in myData$vars) {
 
 colnames(result) <- c('PIDN',myData$vars)
 
-save(result,file='data/result.dl_1.CData')
+save(result,file='data/result.h2o_1.CData')
+
+h2o.shutdown(localH2O, prompt = FALSE)
 
 #thold <- list(SOC=0.58,pH=0.2,Ca=0.42,P=0.1,Sand=0.62)
 #[1] 0.2340749 0.3144453 0.1573988 0.9390527 0.2559151
