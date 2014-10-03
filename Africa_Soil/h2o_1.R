@@ -13,7 +13,7 @@ localH2O <- h2o.init(ip = 'localhost', port =54321, startH2O = TRUE)
 #demo(h2o.glm)
 #thold <- list(SOC=0.58,pH=0.2,Ca=0.42,P=0.1,Sand=0.62)
 #thold <- list(SOC=0.5,pH=0.1,Ca=0.4,P=0.1,Sand=0.5)
-thold <- list(SOC=0,pH=0,Ca=0,P=0,Sand=0)
+thold <- list(SOC=0.05,pH=0.05,Ca=0.05,P=0.05,Sand=0.05)
 
 
 tmf <- paste(getwd(),'data/tmp.csv',sep='/')
@@ -44,8 +44,8 @@ for (i in myData$vars) {
 #                              data = train_hex_split[[1]],
 #                              validation = train_hex_split[[2]],
                             activation = "RectifierWithDropout",
-                            hidden = c(75, 75,75,75),
-                            epochs = 20,
+                            hidden = c(150, 150,150),
+                            epochs = 50,
                             seed=123456,
                             
                             classification = FALSE,
