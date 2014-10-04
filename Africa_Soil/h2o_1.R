@@ -14,6 +14,7 @@ localH2O <- h2o.init(ip = 'localhost', port =54321, startH2O = TRUE)
 #thold <- list(SOC=0.58,pH=0.2,Ca=0.42,P=0.1,Sand=0.62)
 #thold <- list(SOC=0.5,pH=0.1,Ca=0.4,P=0.1,Sand=0.5)
 thold <- list(SOC=0.05,pH=0.05,Ca=0.05,P=0.05,Sand=0.05)
+usedCols <- c(myData$otherVars,myData$mNames)
 
 
 tmf <- paste(getwd(),'data/tmp.csv',sep='/')
@@ -27,16 +28,16 @@ test_hex <- h2o.importFile(localH2O, path = tmf, key = "test.hex")
 result <- data.frame(PIDN = test$PIDN)
 
 for (i in myData$vars) {
-  print(i)
   
   tmf <- c()
   
-  for (j in colnames(myData$CM)) {
+  for (j in usedCols) {
     if (myData$CM[[i,j]] > thold[[i]]) {
       tmf <- c(tmf,j)
     }
   }
   
+  print(paste(i,length(tmf),sep=":"))
   
   model <- h2o.deeplearning(x = tmf,
                             y = i,
@@ -44,8 +45,8 @@ for (i in myData$vars) {
 #                              data = train_hex_split[[1]],
 #                              validation = train_hex_split[[2]],
                             activation = "RectifierWithDropout",
-                            hidden = c(500, 500),
-                            epochs = 50,
+                            hidden = c(750, 750),
+                            epochs = 60,
                             seed=123456,
                             
                             classification = FALSE,

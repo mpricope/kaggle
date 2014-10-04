@@ -5,11 +5,11 @@ load('data/f.RData')
 
 
 #usedCols <- c(myData$mNames)
-usedCols <- c(myData$otherVars,myData$mNames,myData$dNames)
+usedCols <- c(myData$otherVars,myData$mNames)
 
 #thold <- list(SOC=0,pH=0,Ca=0,P=0,Sand=0)
-thold <- list(SOC=0.3,pH=0.1,Ca=0.15,P=0.05,Sand=0.3)
-#thold <- list(SOC=0.05,pH=0.05,Ca=0.05,P=0.05,Sand=0.05)
+#thold <- list(SOC=0.3,pH=0.1,Ca=0.15,P=0.05,Sand=0.3)
+thold <- list(SOC=0.05,pH=0.05,Ca=0.05,P=0.05,Sand=0.05)
 
 result <- data.frame(PIDN = test$PIDN)
 
@@ -31,7 +31,7 @@ for (i in myData$vars) {
   ytrain <- as.matrix(train[,i])
 #   
   print ('Fitting Model')
-  fit <- svm(xtrain,ytrain,type="eps-regression",cost=10000,scale=FALSE)
+  fit <- svm(xtrain,ytrain,type="eps-regression",cost=10000,epsilon=0.05,scale=FALSE)
 # fit <- svm(xtrain,ytrain,type="eps-regression",
 #            kernel="radial basis",cost=10000)
 

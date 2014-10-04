@@ -12,13 +12,16 @@ flds <- createFolds(1:nrow(train), k = nfolds)
 
 origTrain <- train
 err<- data.frame(matrix(nrow=0,ncol=(length(myData$vars) + 1)))
+
+myData$vars <- c('Ca','P')
+
 for (idxFold in 1:nfolds) {
   test <- origTrain[flds[[idxFold]],]
   train <- origTrain[-flds[[idxFold]],]
   save(train,test,myData,file='data/f.RData')
   
-#   source('svm_1.R',echo=TRUE)
-  source('h2o_1.R',echo=TRUE)
+  source('svm_1.R',echo=TRUE)
+#  source('h2o_1.R',echo=TRUE)
   source('combine.R',echo=TRUE)
   
   tme <- c(e,em)
