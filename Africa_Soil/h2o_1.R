@@ -44,7 +44,7 @@ for (i in myData$vars) {
 #                              data = train_hex_split[[1]],
 #                              validation = train_hex_split[[2]],
                             activation = "RectifierWithDropout",
-                            hidden = c(150, 150,150),
+                            hidden = c(500, 500),
                             epochs = 50,
                             seed=123456,
                             
