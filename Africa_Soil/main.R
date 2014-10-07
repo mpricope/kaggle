@@ -20,7 +20,7 @@ for (idxFold in 1:nfolds) {
   train <- origTrain[-flds[[idxFold]],]
   save(train,test,myData,file='data/f.RData')
   
-  source('svm_1.R',echo=TRUE)
+  source('knn.R',echo=TRUE)
 #  source('h2o_1.R',echo=TRUE)
   source('combine.R',echo=TRUE)
   

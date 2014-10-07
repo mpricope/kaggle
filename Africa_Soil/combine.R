@@ -1,7 +1,7 @@
 load(paste('data/input',p,'RData',sep='.'))
 load('data/f.RData')
 
-algs <- c('svm_1')
+algs <- c('rdg')
 #algs <- c('dl_1','M5P_1')
 #algs <- c('M5P_1','rforest_1','cforest_1')
 
@@ -45,8 +45,8 @@ evalSoil <- function (res,test,vars) {
 
 # cr[,'SOC'] <- cr[,'SOC.h2o_1']
 # cr[,'pH'] <- cr[,'pH.h2o_1']
-cr[,'Ca'] <- cr[,'Ca.svm_1']
-cr[,'P'] <- cr[,'P.svm_1']
+cr[,'Ca'] <- cr[,'Ca.rdg']
+cr[,'P'] <- cr[,'P.rdg']
 # cr[,'Sand'] <- cr[,'Sand.h2o_1']
 
 # cr[,'SOC'] <- cr[,'SOC.dl_1']
