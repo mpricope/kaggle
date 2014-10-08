@@ -49,16 +49,19 @@ def data(path, label_path=None):
         if t == 0:
             # create a static x,
             # so we don't have to construct a new x for every instance
-            x = [0] * 146
+            x = [0] * (146 + 46)
             if label_path:
                 label = open(label_path)
                 label.readline()  # we don't need the headers
             continue
         # parse x
-        for m, feat in enumerate(line.rstrip().split(',')):
+        row = line.rstrip().split(',')
+        for m, feat in enumerate(row):
             if m == 0:
                 ID = int(feat)
-            else:
+#            elif (is_number(feat)):
+#                x[m] = feat % D
+            else: 
                 # one-hot encode everything with hash trick
                 # categorical: one-hotted
                 # boolean: ONE-HOTTED
@@ -67,6 +70,14 @@ def data(path, label_path=None):
                 #       i.e., same value won't always have the same hash
                 #       on different machines
                 x[m] = abs(hash(str(m) + '_' + feat)) % D
+        
+        hash_cols = [3,4,34,35,61,64,65,91,94,95]
+        t = 146
+        for i in xrange(10):
+          for j in xrange(i+1,10):
+            t += 1
+            x[t] = abs(hash(row[hash_cols[i]]+"_x_"+row[hash_cols[j]])) % D
+        
         # parse y, if provided
         if label_path:
             # use float() to prevent future type casting, [1:] to ignore id
@@ -97,6 +108,12 @@ def predict(x, w):
         wTx += w[i] * 1.  # w[i] * x[i], but if i in x we got x[i] = 1.
     return 1. / (1. + exp(-max(min(wTx, 20.), -20.)))  # bounded sigmoid
 
+def is_number(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
 
 # D. Update given model
 # INPUT:
@@ -142,7 +159,7 @@ for ID, x, y in data(train, label):
     loss += loss_y14  # the loss of y14, logloss is never zero
 
     # print out progress, so that we know everything is working
-    if ID % 100000 == 0:
+    if ID % 50000 == 0:
         print('%s\tencountered: %d\tcurrent logloss: %f' % (
             datetime.now(), ID, (loss/33.)/ID))
 
