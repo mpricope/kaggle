@@ -30,7 +30,7 @@ label = 'data/trainLabels.csv'  # path to label file of training data
 test = 'data/test.csv'  # path to testing file
 
 D = 2 ** 21 + 2 ** 19  # number of weights use for each model, we have 32 of them
-alpha = .17   # learning rate for sgd optimization
+alpha = .18   # learning rate for sgd optimization
 
 
 # function, generator definitions ############################################
@@ -43,13 +43,15 @@ alpha = .17   # learning rate for sgd optimization
 #     ID: id of the instance (can also acts as instance count)
 #     x: a list of indices that its value is 1
 #     y: (if label_path is present) label value of y1 to y33
-def data(path, label_path=None):
+def data(nums,path, label_path=None):
     for t, line in enumerate(open(path)):
         # initialize our generator
+    
         if t == 0:
             # create a static x,
             # so we don't have to construct a new x for every instance
             x = [0] * (146 + 46)
+#            nums = [False] * (146 + 46)
             if label_path:
                 label = open(label_path)
                 label.readline()  # we don't need the headers
@@ -59,8 +61,10 @@ def data(path, label_path=None):
         for m, feat in enumerate(row):
             if m == 0:
                 ID = int(feat)
-#            elif (is_number(feat)):
-#                x[m] = int(float(feat) * D) % D
+            elif (nums[m]):
+                x[m] = float(feat)
+#                if (t == 1):
+#                    nums[m] = True
             else: 
                 # one-hot encode everything with hash trick
                 # categorical: one-hotted
@@ -70,13 +74,13 @@ def data(path, label_path=None):
                 #       i.e., same value won't always have the same hash
                 #       on different machines
                 x[m] = abs(hash(str(m) + '_' + feat)) % D
-        
+#        print str(nums)
         hash_cols = [3,4,34,35,61,64,65,91,94,95]
-        t = 146
+        tt = 146
         for i in xrange(10):
           for j in xrange(i+1,10):
-            t += 1
-            x[t] = abs(hash(row[hash_cols[i]]+"_x_"+row[hash_cols[j]])) % D
+            tt += 1
+            x[tt] = abs(hash(row[hash_cols[i]]+"_x_"+row[hash_cols[j]])) % D
         
         # parse y, if provided
         if label_path:
@@ -102,10 +106,13 @@ def logloss(p, y):
 #     w: weights
 # OUTPUT:
 #     probability of p(y = 1 | x; w)
-def predict(x, w):
+def predict(x, w,nums):
     wTx = 0.
-    for i in x:  # do wTx
-        wTx += w[i] * 1.  # w[i] * x[i], but if i in x we got x[i] = 1.
+    for idx,i in enumerate(x):  # do wTx
+        if (nums[idx]):
+            wTx += w[0] * i  # w[i] * x[i], but if i in x we got x[i] = 1.
+        else:
+            wTx += w[i] * 1.  # w[i] * x[i], but if i in x we got x[i] = 1.
     return 1. / (1. + exp(-max(min(wTx, 20.), -20.)))  # bounded sigmoid
 
 def is_number(s):
@@ -127,13 +134,17 @@ def is_number(s):
 # MODIFIES:
 #     w: weights
 #     n: sum of past absolute gradients
-def update(alpha, w, n, x, p, y):
-    for i in x:
+def update(alpha, w, n, x, p, y,nums):
+    for idx,i in enumerate(x):
         # alpha / sqrt(n) is the adaptive learning rate
         # (p - y) * x[i] is the current gradient
         # note that in our case, if i in x then x[i] = 1.
-        n[i] += abs(p - y)
-        w[i] -= (p - y) * 1. * alpha / sqrt(n[i])
+        if (nums[idx]):
+            n[0] += abs(p - y)
+            w[0] -= (p - y) * i * alpha/sqrt(n[0])
+        else:
+            n[i] += abs(p - y)
+            w[i] -= (p - y) * 1. * alpha / sqrt(n[i])
 
 
 # training and testing #######################################################
@@ -146,15 +157,25 @@ K = [k for k in range(33) if k != 13]
 w = [[0.] * D if k != 13 else None for k in range(33)]
 n = [[0.] * D if k != 13 else None for k in range(33)]
 
+#nums = [5, 6, 7, 8, 9, 15, 16, 17, 18, 19, 20, 21, 22, 23, 27, 28, 29, 36, 37, 38, 39, 40, 46, 47, 48, 49, 50, 51, 52, 53, 54, 58, 59, 60, 66, 67, 68, 69, 70, 76, 77, 78, 79, 80, 81, 82, 83, 84, 88, 89, 90, 96, 97, 98, 99, 100, 106, 107, 108, 109, 110, 111, 112, 113, 114, 118, 119, 120, 121, 122, 123, 124, 125, 131, 132, 133, 134, 135, 136, 137, 138, 139, 143, 144, 145]
+numsCol = [5,6,7]
+#numsCol = [5,6,7,8,9,16,19,21,28,29,36,37,38,39,40,47,50,52,59,60,66,67,68,69,70,77,80,82,89,90,96,97,98,99,100,107,110,112,119,120,121,122,123,124,125,132,135,137,144,145]
+#nums = [False, False, False, False, False, True, True, True, True, True, False, False, False, False, False, True, True, True, True, True, True, True, True, True, False, False, False, True, True, True, False, False, False, False, False, False, True, True, True, True, True, False, False, False, False, False, True, True, True, True, True, True, True, True, True, False, False, False, True, True, True, False, False, False, False, False, True, True, True, True, True, False, False, False, False, False, True, True, True, True, True, True, True, True, True, False, False, False, True, True, True, False, False, False, False, False, True, True, True, True, True, False, False, False, False, False, True, True, True, True, True, True, True, True, True, False, False, False, True, True, True, True, True, True, True, True, False, False, False, False, False, True, True, True, True, True, True, True, True, True, False, False, False, True, True, True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False]
+nums = [False] * 192
+for k in numsCol:
+    nums[k] = True
+
+
+
 loss = 0.
 loss_y14 = log(1. - 10**-15)
 
-for ID, x, y in data(train, label):
+for ID, x, y in data(nums,train, label):
 
     # get predictions and train on all labels
     for k in K:
-        p = predict(x, w[k])
-        update(alpha, w[k], n[k], x, p, y[k])
+        p = predict(x, w[k],nums)
+        update(alpha, w[k], n[k], x, p, y[k],nums)
         loss += logloss(p, y[k])  # for progressive validation
     loss += loss_y14  # the loss of y14, logloss is never zero
 
@@ -165,9 +186,9 @@ for ID, x, y in data(train, label):
 
 with open('./data/submission1234.csv', 'w') as outfile:
     outfile.write('id_label,pred\n')
-    for ID, x in data(test):
+    for ID, x in data(nums,test):
         for k in K:
-            p = predict(x, w[k])
+            p = predict(x, w[k],nums)
             outfile.write('%s_y%d,%s\n' % (ID, k+1, str(p)))
             if k == 12:
                 outfile.write('%s_y14,0.0\n' % ID)
