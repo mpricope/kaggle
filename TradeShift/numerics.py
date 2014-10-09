@@ -25,9 +25,9 @@ from math import log, exp, sqrt
 
 # parameters #################################################################
 
-train = 'data/train_3.csv'  # path to training file
+train = 'data/train.csv'  # path to training file
 label = 'data/trainLabels.csv'  # path to label file of training data
-test = 'data/test_3.csv'  # path to testing file
+test = 'data/test.csv'  # path to testing file
 
 D = 2 ** 21 + 2 ** 19  # number of weights use for each model, we have 32 of them
 alpha = .18   # learning rate for sgd optimization
@@ -158,7 +158,7 @@ w = [[0.] * D if k != 13 else None for k in range(33)]
 n = [[0.] * D if k != 13 else None for k in range(33)]
 
 #nums = [5, 6, 7, 8, 9, 15, 16, 17, 18, 19, 20, 21, 22, 23, 27, 28, 29, 36, 37, 38, 39, 40, 46, 47, 48, 49, 50, 51, 52, 53, 54, 58, 59, 60, 66, 67, 68, 69, 70, 76, 77, 78, 79, 80, 81, 82, 83, 84, 88, 89, 90, 96, 97, 98, 99, 100, 106, 107, 108, 109, 110, 111, 112, 113, 114, 118, 119, 120, 121, 122, 123, 124, 125, 131, 132, 133, 134, 135, 136, 137, 138, 139, 143, 144, 145]
-numsCol = [5,6,7,8,9,29,28,17,16,19]
+numsCol = [5,6,7,8,9,29,28,16,19,21,20]
 #numsCol = [5, 6, 7, 8, 9, 15, 16, 17, 18, 19, 20, 21, 22, 23, 27, 28, 29, 36, 37, 38, 39, 40, 46, 47, 48, 49, 50, 51, 52, 53, 54, 58, 59, 60, 66, 67, 68, 69, 70, 76, 77, 78, 79, 80, 81, 82, 83, 84, 88, 89, 90, 96, 97, 98, 99, 100, 106, 107, 108, 109, 110, 111, 112, 113, 114, 118, 119, 120, 121, 122, 123, 124, 125, 131, 132, 133, 134, 135, 136, 137, 138, 139, 143, 144, 145]
 #numsCol = [5,6,7,8,9,15, 16, 17, 18,19,21,28,29,36,37,38,39,40,47,50,52,59,60,66,67,68,69,70,77,80,82,89,90,96,97,98,99,100,107,110,112,119,120,121,122,123,124,125,132,135,137,144,145]
 #nums = [False, False, False, False, False, True, True, True, True, True, False, False, False, False, False, True, True, True, True, True, True, True, True, True, False, False, False, True, True, True, False, False, False, False, False, False, True, True, True, True, True, False, False, False, False, False, True, True, True, True, True, True, True, True, True, False, False, False, True, True, True, False, False, False, False, False, True, True, True, True, True, False, False, False, False, False, True, True, True, True, True, True, True, True, True, False, False, False, True, True, True, False, False, False, False, False, True, True, True, True, True, False, False, False, False, False, True, True, True, True, True, True, True, True, True, False, False, False, True, True, True, True, True, True, True, True, False, False, False, False, False, True, True, True, True, True, True, True, True, True, False, False, False, True, True, True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False]
