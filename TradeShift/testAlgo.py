@@ -127,7 +127,7 @@ def update(alpha, w, n, x, p, y,nums):
             
 # training and testing #######################################################
 start = datetime.now()
-train = 'data/train_3.csv'  # path to training file
+train = 'data/train.csv'  # path to training file
 label = 'data/trainLabels.csv'  # path to label file of training data
 
 
@@ -171,17 +171,21 @@ def runAlgo(alpha,nums,tCutoff,pCutoff):
 
     
 
-numsCol = [5,6,7,8,9,15,16,17,18,19,20,21,22,23]
+numsCol = [5,6,7,8,9]
 #numsCol = [5, 6, 7, 8, 9, 15, 16, 17, 18, 19, 20, 21, 22, 23, 27, 28, 29, 36, 37, 38, 39, 40, 46, 47, 48, 49, 50, 51, 52, 53, 54, 58, 59, 60, 66, 67, 68, 69, 70, 76, 77, 78, 79, 80, 81, 82, 83, 84, 88, 89, 90, 96, 97, 98, 99, 100, 106, 107, 108, 109, 110, 111, 112, 113, 114, 118, 119, 120, 121, 122, 123, 124, 125, 131, 132, 133, 134, 135, 136, 137, 138, 139, 143, 144, 145]
 #numsCol = [5,6,7,8,9,15, 16, 17, 18,19,21,28,29,36,37,38,39,40,47,50,52,59,60,66,67,68,69,70,77,80,82,89,90,96,97,98,99,100,107,110,112,119,120,121,122,123,124,125,132,135,137,144,145]
 #nums = [False, False, False, False, False, True, True, True, True, True, False, False, False, False, False, True, True, True, True, True, True, True, True, True, False, False, False, True, True, True, False, False, False, False, False, False, True, True, True, True, True, False, False, False, False, False, True, True, True, True, True, True, True, True, True, False, False, False, True, True, True, False, False, False, False, False, True, True, True, True, True, False, False, False, False, False, True, True, True, True, True, True, True, True, True, False, False, False, True, True, True, False, False, False, False, False, True, True, True, True, True, False, False, False, False, False, True, True, True, True, True, True, True, True, True, False, False, False, True, True, True, True, True, True, True, True, False, False, False, False, False, True, True, True, True, True, True, True, True, True, False, False, False, True, True, True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False]
 nums = [False] * 192
 for k in numsCol:
     nums[k] = True
+    
+#res = runAlgo(.18,nums,200000,300000)
+#print ("Reference Original Train")
+#print (res)
 
-testCols =  [27, 28, 29, 36, 37, 38, 39, 40, 46, 47, 48, 49, 50, 51, 52, 53, 54, 58, 59, 60, 66, 67, 68, 69, 70, 76, 77, 78, 79, 80, 81, 82, 83, 84, 88, 89, 90, 96, 97, 98, 99, 100, 106, 107, 108, 109, 110, 111, 112, 113, 114, 118, 119, 120, 121, 122, 123, 124, 125, 131, 132, 133, 134, 135, 136, 137, 138, 139, 143, 144, 145]
-#testCols =  [27, 28, 29]
-
+#testCols =  [36, 37, 38, 39, 40, 46, 47, 48, 49, 50, 51, 52, 53, 54, 58, 59, 60, 66, 67, 68, 69, 70, 76, 77, 78, 79, 80, 81, 82, 83, 84, 88, 89, 90, 96, 97, 98, 99, 100, 106, 107, 108, 109, 110, 111, 112, 113, 114, 118, 119, 120, 121, 122, 123, 124, 125, 131, 132, 133, 134, 135, 136, 137, 138, 139, 143, 144, 145]
+testCols =  [15,16,17,18,19,20,21,22,23,27, 28, 29]
+#
 results = []
 
 
@@ -193,7 +197,7 @@ for c in testCols:
     nums = [False] * 192
     for k in testNumCols:
         nums[k] = True
-    (newLossT, newLossP) = runAlgo(.18,nums,2000,3000)
+    (newLossT, newLossP) = runAlgo(.18,nums,100000,150000)
     print("Results for %d are lossT=%.15f,lossP=%.15f" % (c,newLossT,newLossP))
     results.append([newLossP,newLossT,c])
     
