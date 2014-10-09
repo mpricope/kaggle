@@ -1,37 +1,15 @@
-'''
-           DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
-                   Version 2, December 2004
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Oct 09 10:17:22 2014
 
-Copyright (C) 2004 Sam Hocevar <sam@hocevar.net>
-
-Everyone is permitted to copy and distribute verbatim or modified
-copies of this license document, and changing it is allowed as long
-as the name is changed.
-
-           DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
-  TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
-
- 0. You just DO WHAT THE FUCK YOU WANT TO.
-'''
+@author: mpricope
+"""
 
 
 from datetime import datetime
 from math import log, exp, sqrt
 
-
-# TL; DR
-# the main learning process start at line 122
-
-
-# parameters #################################################################
-
-train = 'data/train_3.csv'  # path to training file
-label = 'data/trainLabels.csv'  # path to label file of training data
-test = 'data/test.csv'  # path to testing file
-
-D = 2 ** 21 + 2 ** 19  # number of weights use for each model, we have 32 of them
-alpha = .18   # learning rate for sgd optimization
-
+D = 2 ** 21 + 2 ** 19 
 
 # function, generator definitions ############################################
 
@@ -43,7 +21,7 @@ alpha = .18   # learning rate for sgd optimization
 #     ID: id of the instance (can also acts as instance count)
 #     x: a list of indices that its value is 1
 #     y: (if label_path is present) label value of y1 to y33
-def data(nums,path, label_path=None):
+def data(nums,path,  label_path=None):
     for t, line in enumerate(open(path)):
         # initialize our generator
     
@@ -145,19 +123,39 @@ def update(alpha, w, n, x, p, y,nums):
         else:
             n[i] += abs(p - y)
             w[i] -= (p - y) * 1. * alpha / sqrt(n[i])
-
-
+            
+            
 # training and testing #######################################################
 start = datetime.now()
+train = 'data/train_3.csv'  # path to training file
+label = 'data/trainLabels.csv'  # path to label file of training data
 
-# a list for range(0, 33) - 13, no need to learn y14 since it is always 0
-K = [k for k in range(33) if k != 13]
 
-# initialize our model, all 32 of them, again ignoring y14
-w = [[0.] * D if k != 13 else None for k in range(33)]
-n = [[0.] * D if k != 13 else None for k in range(33)]
+def runAlgo(alpha,nums):
+    
+    K = [k for k in range(33) if k != 13]
+    w = [[0.] * D if k != 13 else None for k in range(33)]
+    n = [[0.] * D if k != 13 else None for k in range(33)]
 
-#nums = [5, 6, 7, 8, 9, 15, 16, 17, 18, 19, 20, 21, 22, 23, 27, 28, 29, 36, 37, 38, 39, 40, 46, 47, 48, 49, 50, 51, 52, 53, 54, 58, 59, 60, 66, 67, 68, 69, 70, 76, 77, 78, 79, 80, 81, 82, 83, 84, 88, 89, 90, 96, 97, 98, 99, 100, 106, 107, 108, 109, 110, 111, 112, 113, 114, 118, 119, 120, 121, 122, 123, 124, 125, 131, 132, 133, 134, 135, 136, 137, 138, 139, 143, 144, 145]
+    loss = 0.
+    loss_y14 = log(1. - 10**-15)
+
+    for ID, x, y in data(nums,train, label):
+
+        # get predictions and train on all labels
+        for k in K:
+            p = predict(x, w[k],nums)
+            update(alpha, w[k], n[k], x, p, y[k],nums)
+            loss += logloss(p, y[k])  # for progressive validation
+        loss += loss_y14  # the loss of y14, logloss is never zero
+    
+        # print out progress, so that we know everything is working
+        if ID % 50000 == 0:
+            print('%s\tencountered: %d\tcurrent logloss: %f' % (
+                datetime.now(), ID, (loss/33.)/ID))
+
+    
+
 numsCol = [5,6,7,8,9,15,16,17,18,19,20,21,22,23]
 #numsCol = [5, 6, 7, 8, 9, 15, 16, 17, 18, 19, 20, 21, 22, 23, 27, 28, 29, 36, 37, 38, 39, 40, 46, 47, 48, 49, 50, 51, 52, 53, 54, 58, 59, 60, 66, 67, 68, 69, 70, 76, 77, 78, 79, 80, 81, 82, 83, 84, 88, 89, 90, 96, 97, 98, 99, 100, 106, 107, 108, 109, 110, 111, 112, 113, 114, 118, 119, 120, 121, 122, 123, 124, 125, 131, 132, 133, 134, 135, 136, 137, 138, 139, 143, 144, 145]
 #numsCol = [5,6,7,8,9,15, 16, 17, 18,19,21,28,29,36,37,38,39,40,47,50,52,59,60,66,67,68,69,70,77,80,82,89,90,96,97,98,99,100,107,110,112,119,120,121,122,123,124,125,132,135,137,144,145]
@@ -166,32 +164,7 @@ nums = [False] * 192
 for k in numsCol:
     nums[k] = True
 
-
-
-loss = 0.
-loss_y14 = log(1. - 10**-15)
-
-for ID, x, y in data(nums,train, label):
-
-    # get predictions and train on all labels
-    for k in K:
-        p = predict(x, w[k],nums)
-        update(alpha, w[k], n[k], x, p, y[k],nums)
-        loss += logloss(p, y[k])  # for progressive validation
-    loss += loss_y14  # the loss of y14, logloss is never zero
-
-    # print out progress, so that we know everything is working
-    if ID % 50000 == 0:
-        print('%s\tencountered: %d\tcurrent logloss: %f' % (
-            datetime.now(), ID, (loss/33.)/ID))
-
-with open('./data/submission1234.csv', 'w') as outfile:
-    outfile.write('id_label,pred\n')
-    for ID, x in data(nums,test):
-        for k in K:
-            p = predict(x, w[k],nums)
-            outfile.write('%s_y%d,%s\n' % (ID, k+1, str(p)))
-            if k == 12:
-                outfile.write('%s_y14,0.0\n' % ID)
+runAlgo(.18,nums)
 
 print('Done, elapsed time: %s' % str(datetime.now() - start))
+            
