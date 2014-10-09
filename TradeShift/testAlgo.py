@@ -131,28 +131,43 @@ train = 'data/train_3.csv'  # path to training file
 label = 'data/trainLabels.csv'  # path to label file of training data
 
 
-def runAlgo(alpha,nums):
+def runAlgo(alpha,nums,tCutoff,pCutoff):
     
     K = [k for k in range(33) if k != 13]
     w = [[0.] * D if k != 13 else None for k in range(33)]
     n = [[0.] * D if k != 13 else None for k in range(33)]
 
     loss = 0.
+    tLoss = 0
     loss_y14 = log(1. - 10**-15)
+    
+    pLoss = 0.
 
     for ID, x, y in data(nums,train, label):
 
-        # get predictions and train on all labels
-        for k in K:
-            p = predict(x, w[k],nums)
-            update(alpha, w[k], n[k], x, p, y[k],nums)
-            loss += logloss(p, y[k])  # for progressive validation
-        loss += loss_y14  # the loss of y14, logloss is never zero
-    
-        # print out progress, so that we know everything is working
-        if ID % 50000 == 0:
-            print('%s\tencountered: %d\tcurrent logloss: %f' % (
-                datetime.now(), ID, (loss/33.)/ID))
+        if (ID < tCutoff):
+            # get predictions and train on all labels
+            for k in K:
+                p = predict(x, w[k],nums)
+                update(alpha, w[k], n[k], x, p, y[k],nums)
+                loss += logloss(p, y[k])  # for progressive validation
+            loss += loss_y14  # the loss of y14, logloss is never zero
+            tLoss = (loss/33.)/ID
+        
+            # print out progress, so that we know everything is working
+            if ID % 50000 == 0:
+                print('%s\tencountered: %d\tcurrent logloss: %f' % (
+                    datetime.now(), ID, (loss/33.)/ID))
+        elif (ID < pCutoff):
+            for k in K:
+                p = predict(x, w[k],nums)
+                pLoss += logloss(p, y[k])  # for progressive validation
+            pLoss += loss_y14  # the loss of y14, logloss is never zero
+        else:
+            print ('Predicted Loss: %f' % (pLoss/ (33. * (pCutoff - tCutoff))))
+            return tLoss,pLoss/ (33. * (pCutoff - tCutoff))
+            break
+            
 
     
 
@@ -164,7 +179,31 @@ nums = [False] * 192
 for k in numsCol:
     nums[k] = True
 
-runAlgo(.18,nums)
+testCols =  [27, 28, 29, 36, 37, 38, 39, 40, 46, 47, 48, 49, 50, 51, 52, 53, 54, 58, 59, 60, 66, 67, 68, 69, 70, 76, 77, 78, 79, 80, 81, 82, 83, 84, 88, 89, 90, 96, 97, 98, 99, 100, 106, 107, 108, 109, 110, 111, 112, 113, 114, 118, 119, 120, 121, 122, 123, 124, 125, 131, 132, 133, 134, 135, 136, 137, 138, 139, 143, 144, 145]
+#testCols =  [27, 28, 29]
+
+results = []
+
+
+
+for c in testCols:
+    print("Evaluate %d" % (c))
+    testNumCols = numsCol[:]
+    testNumCols.append(c)
+    nums = [False] * 192
+    for k in testNumCols:
+        nums[k] = True
+    (newLossT, newLossP) = runAlgo(.18,nums,2000,3000)
+    print("Results for %d are lossT=%.15f,lossP=%.15f" % (c,newLossT,newLossP))
+    results.append([newLossP,newLossT,c])
+    
+resultSorted = sorted(results, key=lambda tup: tup[0])
+
+for i in resultSorted:
+    print(i)
+
+#t = runAlgo(.18,nums,20000,30000)
+#print(t)
 
 print('Done, elapsed time: %s' % str(datetime.now() - start))
             

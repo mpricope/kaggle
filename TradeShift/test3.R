@@ -1,4 +1,6 @@
 load('data/train.RData')
+load('data/test.RData')
+
 # 
 # for (i in colnames(train)) {
 #   if (is.numeric(train[,i])) {
@@ -12,10 +14,22 @@ nums = c(5, 6, 7, 8, 9, 15, 16, 17, 18, 19, 20, 21, 22, 23, 27, 28, 29, 36, 37, 
 
 for (n in nums) {
   i = paste("x",n,sep="")
-  min = min(train[,i])
-  max = max(train[,i])
+  print(i)
+  min = min(train[,i],test[,i])
+  max = max(train[,i],test[,i])
   train[,i] = train[,i] / (max - min)
+  test[,i] = test[,i] / (max - min)
   
 }
 
+# for (n in nums) {
+#   i = paste("x",n,sep="")
+#   print(i)
+#   min = min(test[,i])
+#   max = max(test[,i])
+#   test[,i] = test[,i] / (max - min)
+#   
+# }
+
 write.csv(train, file = "data/train_3.csv", row.names = FALSE)
+write.csv(test, file = "data/test_3.csv", row.names = FALSE)

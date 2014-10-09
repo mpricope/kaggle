@@ -27,7 +27,7 @@ from math import log, exp, sqrt
 
 train = 'data/train_3.csv'  # path to training file
 label = 'data/trainLabels.csv'  # path to label file of training data
-test = 'data/test.csv'  # path to testing file
+test = 'data/test_3.csv'  # path to testing file
 
 D = 2 ** 21 + 2 ** 19  # number of weights use for each model, we have 32 of them
 alpha = .18   # learning rate for sgd optimization
