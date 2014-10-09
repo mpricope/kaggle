@@ -127,7 +127,7 @@ def update(alpha, w, n, x, p, y,nums):
             
 # training and testing #######################################################
 start = datetime.now()
-train = 'data/train.csv'  # path to training file
+train = 'data/train_3.csv'  # path to training file
 label = 'data/trainLabels.csv'  # path to label file of training data
 
 
@@ -183,12 +183,13 @@ for k in numsCol:
 #print ("Reference Original Train")
 #print (res)
 
-#testCols =  [36, 37, 38, 39, 40, 46, 47, 48, 49, 50, 51, 52, 53, 54, 58, 59, 60, 66, 67, 68, 69, 70, 76, 77, 78, 79, 80, 81, 82, 83, 84, 88, 89, 90, 96, 97, 98, 99, 100, 106, 107, 108, 109, 110, 111, 112, 113, 114, 118, 119, 120, 121, 122, 123, 124, 125, 131, 132, 133, 134, 135, 136, 137, 138, 139, 143, 144, 145]
-testCols =  [15,16,17,18,19,20,21,22,23,27, 28, 29]
-#
+#testCols =  [  51, 52, 53, 54, 58, 59, 60, 66, 67, 68, 69, 70, 76, 77, 78, 79, 80, 81, 82, 83, 84, 88, 89, 90, 96, 97, 98, 99, 100, 106, 107, 108, 109, 110, 111, 112, 113, 114, 118, 119, 120, 121, 122, 123, 124, 125, 131, 132, 133, 134, 135, 136, 137, 138, 139, 143, 144, 145]
+testCols =  [36, 37, 38, 39, 40, 46, 47, 48, 49, 50]
+#testedCols = [15,16,17,18,19,20,21,22,23,27, 28, 29] 
 results = []
 
 
+cutoff = .018281669974585812
 
 for c in testCols:
     print("Evaluate %d" % (c))
@@ -198,13 +199,18 @@ for c in testCols:
     for k in testNumCols:
         nums[k] = True
     (newLossT, newLossP) = runAlgo(.18,nums,100000,150000)
-    print("Results for %d are lossT=%.15f,lossP=%.15f" % (c,newLossT,newLossP))
+    #print("Results for %d are lossT=%.15f,lossP=%.15f" % (c,newLossT,newLossP))
     results.append([newLossP,newLossT,c])
     
-resultSorted = sorted(results, key=lambda tup: tup[0])
+    resultSorted = sorted(results, key=lambda tup: tup[0])
 
-for i in resultSorted:
-    print(i)
+    cutoffRiched = False    
+    
+    for i in resultSorted:
+        print(i)
+        if ((i[0] > cutoff) and (not cutoffRiched)):
+            print("---------------- Cuttoff %15f riched-------------------" % (cutoff) )
+            cutoffRiched = True         
 
 #t = runAlgo(.18,nums,20000,30000)
 #print(t)

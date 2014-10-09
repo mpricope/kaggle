@@ -1,0 +1,5 @@
+2014-10-09 16:21:39.026000	encountered: 50000	current logloss: 0.032750
+Predicted Loss: 0.018297
+Reference Original Train
+(0.026360630671133967, 0.01829743652754542)
+Done, elapsed time: 0:02:56.602000
