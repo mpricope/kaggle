@@ -127,12 +127,13 @@ def update(alpha, w, n,wn,nn, x, p, y,nums):
             
 # training and testing #######################################################
 start = datetime.now()
-train = 'data/train_3.csv'  # path to training file
+train = 'data/train.csv'  # path to training file
 label = 'data/trainLabels.csv'  # path to label file of training data
+test = 'data/test.csv'  # path to testing file
 
 varSize = 146 + 46
 
-def runAlgo(alpha,nums,tCutoff,pCutoff):
+def runAlgo(alpha,nums,tCutoff,pCutoff,final = False):
     
     K = [k for k in range(33) if k != 13]
     w = [[0.] * D if k != 13 else None for k in range(33)]
@@ -148,7 +149,7 @@ def runAlgo(alpha,nums,tCutoff,pCutoff):
 
     for ID, x, y in data(nums,train, label):
 
-        if (ID < tCutoff):
+        if ((ID < tCutoff) or (final)):
             # get predictions and train on all labels
             for k in K:
                 p = predict(x, w[k],wn[k],nums)
@@ -170,12 +171,22 @@ def runAlgo(alpha,nums,tCutoff,pCutoff):
             print ('Predicted Loss: %f' % (pLoss/ (33. * (pCutoff - tCutoff))))
             return tLoss,pLoss/ (33. * (pCutoff - tCutoff))
             break
+        
+    with open('./data/submission1234.csv', 'w') as outfile:
+        outfile.write('id_label,pred\n')
+        for ID, x in data(nums,test):
+            for k in K:
+                p = predict(x, w[k],wn[k],nums)
+                outfile.write('%s_y%d,%s\n' % (ID, k+1, str(p)))
+                if k == 12:
+                    outfile.write('%s_y14,0.0\n' % ID)
             
 
     
 
 #numsCol = [5,6,7,8,9]
-numsCol = [5,6,7,8,9,29,28,17,16,19]
+numsCol = [5,6,7,8,9,29,28,16,19,21,20]
+#numsCol = [5,6,7,8,9,29,28,17,16,19]
 #numsCol = [5, 6, 7, 8, 9, 15, 16, 17, 18, 19, 20, 21, 22, 23, 27, 28, 29, 36, 37, 38, 39, 40, 46, 47, 48, 49, 50, 51, 52, 53, 54, 58, 59, 60, 66, 67, 68, 69, 70, 76, 77, 78, 79, 80, 81, 82, 83, 84, 88, 89, 90, 96, 97, 98, 99, 100, 106, 107, 108, 109, 110, 111, 112, 113, 114, 118, 119, 120, 121, 122, 123, 124, 125, 131, 132, 133, 134, 135, 136, 137, 138, 139, 143, 144, 145]
 #numsCol = [5,6,7,8,9,15, 16, 17, 18,19,21,28,29,36,37,38,39,40,47,50,52,59,60,66,67,68,69,70,77,80,82,89,90,96,97,98,99,100,107,110,112,119,120,121,122,123,124,125,132,135,137,144,145]
 #nums = [False, False, False, False, False, True, True, True, True, True, False, False, False, False, False, True, True, True, True, True, True, True, True, True, False, False, False, True, True, True, False, False, False, False, False, False, True, True, True, True, True, False, False, False, False, False, True, True, True, True, True, True, True, True, True, False, False, False, True, True, True, False, False, False, False, False, True, True, True, True, True, False, False, False, False, False, True, True, True, True, True, True, True, True, True, False, False, False, True, True, True, False, False, False, False, False, True, True, True, True, True, False, False, False, False, False, True, True, True, True, True, True, True, True, True, False, False, False, True, True, True, True, True, True, True, True, False, False, False, False, False, True, True, True, True, True, True, True, True, True, False, False, False, True, True, True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False]
@@ -225,8 +236,8 @@ for k in numsCol:
 #
 #print(final)
 
-t = runAlgo(.18,nums,100000,150000)
-print(t)
+t = runAlgo(.18,nums,1800000,1800000,True)
+#print(t)
 
 print('Done, elapsed time: %s' % str(datetime.now() - start))
             
