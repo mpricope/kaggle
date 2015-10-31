@@ -9,7 +9,7 @@ Created on Thu Oct 09 10:17:22 2014
 from datetime import datetime
 from math import log, exp, sqrt
 
-D = 2 ** 21 + 2 ** 19 
+D = 2 ** 21 + 2 ** 20 
 
 # function, generator definitions ############################################
 
@@ -89,8 +89,8 @@ def predict(x, w,wn,nums):
     for idx,i in enumerate(x):  # do wTx
         if (nums[idx]):
             wTx += wn[idx] * i
-        else:
-            wTx += w[i] * 1.  # w[i] * x[i], but if i in x we got x[i] = 1.
+#        else:
+#            wTx += w[i] * 1.  # w[i] * x[i], but if i in x we got x[i] = 1.
     return 1. / (1. + exp(-max(min(wTx, 20.), -20.)))  # bounded sigmoid
 
 def is_number(s):
@@ -120,19 +120,20 @@ def update(alpha, w, n,wn,nn, x, p, y,nums):
         if (nums[idx]):
             nn[idx] += abs(p - y)
             wn[idx] -= (p - y) * i * alpha/sqrt(nn[idx])
-        else:
-            n[i] += abs(p - y)
-            w[i] -= (p - y) * 1. * alpha / sqrt(n[i])
+#        else:
+#            n[i] += abs(p - y)
+#            w[i] -= (p - y) * 1. * alpha / sqrt(n[i])
             
             
 # training and testing #######################################################
 start = datetime.now()
 train = 'data/train.csv'  # path to training file
 label = 'data/trainLabels.csv'  # path to label file of training data
+test = 'data/test.csv'  # path to testing file
 
 varSize = 146 + 46
 
-def runAlgo(alpha,nums,tCutoff,pCutoff):
+def runAlgo(alpha,nums,tCutoff,pCutoff,final = False):
     
     K = [k for k in range(33) if k != 13]
     w = [[0.] * D if k != 13 else None for k in range(33)]
@@ -148,7 +149,7 @@ def runAlgo(alpha,nums,tCutoff,pCutoff):
 
     for ID, x, y in data(nums,train, label):
 
-        if (ID < tCutoff):
+        if ((ID < tCutoff) or (final)):
             # get predictions and train on all labels
             for k in K:
                 p = predict(x, w[k],wn[k],nums)
@@ -170,17 +171,24 @@ def runAlgo(alpha,nums,tCutoff,pCutoff):
             print ('Predicted Loss: %f' % (pLoss/ (33. * (pCutoff - tCutoff))))
             return tLoss,pLoss/ (33. * (pCutoff - tCutoff))
             break
+        
+    with open('./data/submission1234.csv', 'w') as outfile:
+        outfile.write('id_label,pred\n')
+        for ID, x in data(nums,test):
+            for k in K:
+                p = predict(x, w[k],wn[k],nums)
+                outfile.write('%s_y%d,%s\n' % (ID, k+1, str(p)))
+                if k == 12:
+                    outfile.write('%s_y14,0.0\n' % ID)
             
 
     
-#numsCol = [5, 6, 7, 8, 9,  16, 17, 18, 19, 20, 21, 22, 23, 28, 29, 36, 37, 38, 39, 40, 46, 47, 48, 49,50, 51, 52, 53, 54, 58, 59, 60, 66, 67, 68, 69, 70, 76, 77, 78, 79, 80, 81, 82,83, 84, 88, 89, 90, 96, 97, 98, 99, 100, 107, 108,109, 110, 111, 112, 113, 114, 119, 120, 121, 122, 123, 124, 125,  134, 137, 138, 139, 145]
 
-#numsCol = [5, 6, 7, 8, 9,  16, 17, 18, 19, 20, 21, 22, 23, 28, 29, 36, 37, 38, 39, 40, 46, 47, 48, 49,50, 51, 52, 53, 54, 58, 59, 60, 66, 67, 68, 69, 70, 76, 77, 78, 79, 80, 81, 82,83, 84, 88, 89, 90, 96, 97, 98, 99, 100, 107, 108,109, 110, 111, 112, 113, 114, 119, 120, 121, 122, 123, 124, 125,  134, 137, 138, 139, 145]
 #numsCol = [5,6,7,8,9]
-#numsCol = [5,6,7,8,9,29,28,16,19,21,20]
-numsCol = []
 #numsCol = [5, 6, 7, 8, 9,  16, 17, 18, 19, 20, 21, 22, 23, 28, 29, 36, 37, 38, 39, 40, 46, 47, 48, 49,50, 51, 52, 53, 54, 58, 59, 60, 66, 67, 68, 69, 70, 76, 77, 78, 79, 80, 81, 82,83, 84, 88, 89, 90, 96, 97, 98, 99, 100, 107, 108,109, 110, 111, 112, 113, 114, 119, 120, 121, 122, 123, 124, 125,  134, 137, 138, 139, 145]
-
+numsCol = [5,6,7,9,29,36,37,38,39,47,59,66,67,68,69,70,
+           90,96,97,98,99,100,120,121,122,123,124,125,145]
+#numsCol = [5,6,7,8,9,29,28,17,16,19]
 #numsCol = [5, 6, 7, 8, 9, 15, 16, 17, 18, 19, 20, 21, 22, 23, 27, 28, 29, 36, 37, 38, 39, 40, 46, 47, 48, 49, 50, 51, 52, 53, 54, 58, 59, 60, 66, 67, 68, 69, 70, 76, 77, 78, 79, 80, 81, 82, 83, 84, 88, 89, 90, 96, 97, 98, 99, 100, 106, 107, 108, 109, 110, 111, 112, 113, 114, 118, 119, 120, 121, 122, 123, 124, 125, 131, 132, 133, 134, 135, 136, 137, 138, 139, 143, 144, 145]
 #numsCol = [5,6,7,8,9,15, 16, 17, 18,19,21,28,29,36,37,38,39,40,47,50,52,59,60,66,67,68,69,70,77,80,82,89,90,96,97,98,99,100,107,110,112,119,120,121,122,123,124,125,132,135,137,144,145]
 #nums = [False, False, False, False, False, True, True, True, True, True, False, False, False, False, False, True, True, True, True, True, True, True, True, True, False, False, False, True, True, True, False, False, False, False, False, False, True, True, True, True, True, False, False, False, False, False, True, True, True, True, True, True, True, True, True, False, False, False, True, True, True, False, False, False, False, False, True, True, True, True, True, False, False, False, False, False, True, True, True, True, True, True, True, True, True, False, False, False, True, True, True, False, False, False, False, False, True, True, True, True, True, False, False, False, False, False, True, True, True, True, True, True, True, True, True, False, False, False, True, True, True, True, True, True, True, True, False, False, False, False, False, True, True, True, True, True, True, True, True, True, False, False, False, True, True, True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False]
@@ -192,46 +200,45 @@ for k in numsCol:
 #print ("Reference Original Train")
 #print (res)
 
-##testCols =  [  15, 16, 17, 18, 19, 20, 21, 22, 23, 27, 28, 29, 36, 37, 38, 39, 40, 46, 47, 48, 49, 50, 51, 52, 53, 54, 58, 59, 60, 66, 67, 68, 69, 70, 76, 77, 78, 79, 80, 81, 82, 83, 84, 88, 89, 90, 96, 97, 98, 99, 100, 106, 107, 108, 109, 110, 111, 112, 113, 114, 118, 119, 120, 121, 122, 123, 124, 125, 131, 132, 133, 134, 135, 136, 137, 138, 139, 143, 144, 145]
-#testCols =  [   136, 137, 138, 139, 143, 144, 145]
-testCols =  [ 5, 6, 7, 8, 9, 15, 16, 17, 18, 19, 20, 21, 22, 23, 27, 28, 29, 36, 37, 38, 39, 40, 46, 47, 48, 49, 50, 51, 52, 53, 54, 58, 59, 60, 66, 67, 68, 69, 70, 76, 77, 78, 79, 80, 81, 82, 83, 84, 88, 89, 90, 96, 97, 98, 99, 100, 106, 107, 108, 109, 110, 111, 112, 113, 114, 118, 119, 120, 121, 122, 123, 124, 125, 131, 132, 133, 134, 135, 136, 137, 138, 139, 143, 144, 145]
-##testedCols = [15, 16, 17, 18, 19, 20, 21, 22, 23, 27, 28, 29, 36, 37, 38, 39, 40, 46, 47, 48, 49,50, 51, 52, 53, 54, 58, 59, 60, 66, 67, 68, 69, 70, 76, 77, 78, 79, 80, 81, 82] 
-results = []
+##testCols =  [  51, 52, 53, 54, 58, 59, 60, 66, 67, 68, 69, 70, 76, 77, 78, 79, 80, 81, 82, 83, 84, 88, 89, 90, 96, 97, 98, 99, 100, 106, 107, 108, 109, 110, 111, 112, 113, 114, 118, 119, 120, 121, 122, 123, 124, 125, 131, 132, 133, 134, 135, 136, 137, 138, 139, 143, 144, 145]
+#testCols =  [70, 76, 77, 78, 79, 80, 81, 82, 83, 84, 88, 89, 90, 96, 97, 98, 99, 100, 106, 107, 108, 109, 110, 111, 112, 113, 114, 118, 119, 120, 121, 122, 123, 124, 125, 131, 132, 133, 134, 135, 136, 137, 138, 139, 143, 144, 145]
+##testedCols = [15,16,17,18,19,20,21,22,23,27, 28, 29,36, 37, 38, 39, 40, 46, 47, 48, 49, 50,51, 52, 53, 54, 58, 59, 60, 66, 67, 68, 69] 
+#results = []
+#
+#
+#cutoff = .018281669974585812
+#
+#for c in testCols:
+#    print("Evaluate %d" % (c))
+#    testNumCols = numsCol[:]
+#    testNumCols.append(c)
+#    nums = [False] * 192
+#    for k in testNumCols:
+#        nums[k] = True
+#    (newLossT, newLossP) = runAlgo(.18,nums,100000,150000)
+#    #print("Results for %d are lossT=%.15f,lossP=%.15f" % (c,newLossT,newLossP))
+#    results.append([newLossP,newLossT,c])
+#    
+#    resultSorted = sorted(results, key=lambda tup: tup[0])
+#
+#    cutoffRiched = False    
+#    
+#    for i in resultSorted:
+#        if ((i[0] > cutoff) and (not cutoffRiched)):
+#            print("---------------- Cuttoff %15f riched-------------------" % (cutoff) )
+#            cutoffRiched = True         
+#        print(i)
+#
+#final = []
+#resultSorted = sorted(results, key=lambda tup: tup[0])
+#
+#for i in resultSorted:
+#    if (i[0] > cutoff):
+#        final.append(i[2])
+#
+#print(final)
 
-
-cutoff = .0185
-
-for c in testCols:
-    print("Evaluate %d" % (c))
-    testNumCols = numsCol[:]
-    testNumCols.append(c)
-    nums = [False] * 192
-    for k in testNumCols:
-        nums[k] = True
-    (newLossT, newLossP) = runAlgo(.18,nums,100000,150000)
-    #print("Results for %d are lossT=%.15f,lossP=%.15f" % (c,newLossT,newLossP))
-    results.append([newLossP,newLossT,c])
-    
-    resultSorted = sorted(results, key=lambda tup: tup[0])
-
-    cutoffRiched = False    
-    
-    for i in resultSorted:
-        if ((i[0] > cutoff) and (not cutoffRiched)):
-            print("---------------- Cuttoff %.15f riched-------------------" % (cutoff) )
-            cutoffRiched = True         
-        print(i)
-
-final = []
-resultSorted = sorted(results, key=lambda tup: tup[0])
-
-for i in resultSorted:
-    if (i[0] < cutoff):
-        final.append(i[2])
-
-print(final)
-
-#t = runAlgo(.18,nums,500000,650000)
+t = runAlgo(.18,nums,100000,150000,False)
 #print(t)
 
 print('Done, elapsed time: %s' % str(datetime.now() - start))
